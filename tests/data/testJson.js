@@ -184,11 +184,11 @@ const testCases = [
         },
     },
     {
-        name: 'ruby : print hello world',
+        name: 'ruby : puts hello world',
         reqObject: {
             language: 'ruby',
             script:
-                'print "hello world"'
+                'puts "hello world"'
         },
         expectedResponse: {
             val: 'hello world',
@@ -211,6 +211,58 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        "name": "rust: print hello world",
+        "reqObject": {
+            "language": "rust",
+            "script": "fn main() { println!(\"hello world\"); }"
+        },
+        "expectedResponse": {
+            "val": "hello world",
+            "status": 200,
+            "error": 0
+        }
+    },
+    {
+        "name": "go: print hello world",
+        "reqObject": {
+            "language": "go",
+            "script": "package main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"hello world\")\n}"
+        },
+        "expectedResponse": {
+            "val": "hello world",
+            "status": 200,
+            "error": 0
+        }
+    },
+    {
+        "name": "rust: print stdin",
+        "reqObject": {
+            "language": "rust",
+            "script": "use std::io::{self, BufRead};\nfn main() {\n    let stdin = io::stdin();\n    let mut iterator = stdin.lock().lines();\n    let user_input = iterator.next().unwrap().unwrap();\n    println!(\"{}\", user_input);\n}",
+            "stdin": "10\n"
+        },
+        "expectedResponse": {
+            "val": "10\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
+    {
+        "name": "go: print stdin",
+        "reqObject": {
+            "language": "go",
+            "script": "package main\nimport (\n    \"bufio\"\n    \"fmt\"\n    \"os\"\n)\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    user_input, _ := reader.ReadString('\\n')\n    fmt.Print(user_input)\n}",
+            "stdin": "10\n"
+        },
+        "expectedResponse": {
+            "val": "10\n",
+            "status": 200,
+            "error": 0
+        }
+    },            
+           
     {
         name: 'TLE test',
         reqObject: {
@@ -259,6 +311,30 @@ const testCases = [
             error: 1,
         },
     },
+    {
+        "name": "rust: memory limit exceeded",
+        "reqObject": {
+            "language": "rust",
+            "script": "fn main() {\n    let mut vec = Vec::new();\n    for _ in 0..1_000_000_000 {\n        vec.push(0u8);\n    }\n    println!(\"Allocated large vector\");\n}"
+        },
+        "expectedResponse": {
+            "val": "",
+            "status": 200,
+            "error": 1 
+        }
+    },
+    {
+        "name": "go: memory limit exceeded",
+        "reqObject": {
+            "language": "go",
+            "script": "package main\nimport (\n    \"fmt\"\n)\nfunc main() {\n    var data = make([]byte, 1e9) // 1 billion bytes (~1 GB)\n    for i := range data {\n        data[i] = 0\n    }\n    fmt.Println(\"Allocated large slice\")\n}"
+        },
+        "expectedResponse": {
+            "val": "",
+            "status": 200,
+            "error": 1 
+        }
+    },        
     {
         name: 'MLE test 3',
         reqObject: {

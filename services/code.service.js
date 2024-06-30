@@ -1,4 +1,5 @@
 /* globals gc */
+require('dotenv').config();
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
@@ -8,7 +9,7 @@ const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
-const openai = new OpenAI()
+const openai = new OpenAI();
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
@@ -24,8 +25,8 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
 const crypto = require('crypto')
-
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
+    console.log(cmd + " " + res);
     let initialMemory = 0
     let memoryCheckInterval
     let childProcess
@@ -123,6 +124,7 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     if ((errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) || errorMsg.includes('Process killed due to Memory Limit Exceeded')) {
         errorMsg = 'Memory limit exceeded'
     }
+    console.log(errorMsg)
 
     // In case of no error message, the msg could be in stdout
     if (!errorMsg.trim()) errorMsg = outputLog?.stdout || 'Time limit exceeded'
@@ -209,6 +211,7 @@ const _executeCode = async (req, res, response) => {
         language = req.language
         stdin = req.stdin
         const langConfig = LANGUAGES_CONFIG[language]
+        console.log(langConfig)
         // Remove all files from tmp folder
         await _runScript('rm -rf /tmp/*', res)
 
@@ -395,7 +398,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -432,7 +435,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
     for (let i = 0; i < sqlStatements.length; i++) {
         try {
             const res = await _executeStatement(db, sqlStatements[i])
-            if (i == sqlStatements.length - 1) {
+            if (i === sqlStatements.length - 1) {
                 db.close()
                 return { data: res }
             }
